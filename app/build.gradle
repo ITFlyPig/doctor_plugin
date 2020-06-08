@@ -1,5 +1,5 @@
 apply plugin: 'com.android.application'
-apply plugin: 'com.noquickclick.plugin'
+apply plugin: 'com.doctor.plugin'
 
 android {
     compileSdkVersion 29
