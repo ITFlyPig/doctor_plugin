@@ -11,47 +11,53 @@ import org.objectweb.asm.commons.AdviceAdapter;
  */
 public class DoctorMethodVisitor extends AdviceAdapter {
     public static final String TAG = DoctorMethodVisitor.class.getName();
+    private static final int MAX_SECTION_NAME_LEN = 127;
 
     private Type[] paramTypes;//方法参数的类型
     private String classFullName;
     private String methodName;//方法名
+    private String methodSignature;
 
     protected DoctorMethodVisitor(int api, MethodVisitor mv, int access, String name, String desc, String classFullName) {
         super(api, mv, access, name, desc);
         paramTypes = Type.getArgumentTypes(desc);
         this.classFullName = classFullName;
         this.methodName = name;
+        methodSignature = generateMethodSignature(classFullName, name, desc);
+    }
 
+    /**
+     * 生成方法的签名
+     * @param className
+     * @param methodName
+     * @param desc
+     * @return
+     */
+    private String generateMethodSignature(String className, String methodName, String desc) {
+        String newClassName = className.replaceAll("/", ".");
+        return newClassName + "." + methodName + desc;
     }
 
     @Override
     protected void onMethodEnter() {
         super.onMethodEnter();
-        if (classFullName == null) {
-            classFullName = "";
+        if (methodSignature == null) {
+            methodSignature = "";
         }
         //将类名加载到操作数栈
-        mv.visitLdcInsn(classFullName);
-        //将方法名加载到操作数栈
-        mv.visitLdcInsn(methodName);
-
-        int len = paramTypes == null ? 0 : paramTypes.length;
-        if (len > 0) {
-            //创建一个Object数组，将方法的参数放到数组中
-            loadArgArray();
-            mv.visitMethodInsn(INVOKESTATIC, "com/doctor/MethodRecordUtil", "onStart", "(Ljava/lang/String;Ljava/lang/String;[Ljava/lang/Object;)V", false);
-        } else {
-            mv.visitMethodInsn(INVOKESTATIC, "com/doctor/MethodRecordUtil", "onStart", "(Ljava/lang/String;Ljava/lang/String;)V", false);
+        int len =  methodSignature.length();
+        if (len > MAX_SECTION_NAME_LEN) {
+            methodSignature = methodSignature.substring(len - MAX_SECTION_NAME_LEN);
         }
+        mv.visitLdcInsn(methodSignature);
+        //将方法名加载到操作数栈
+        mv.visitMethodInsn(INVOKESTATIC, "com/doctor/TraceTag", "i", "(Ljava/lang/String;)V", false);
 
     }
 
     @Override
     protected void onMethodExit(int opcode) {
         super.onMethodExit(opcode);
-        if (classFullName == null) {
-            classFullName = "";
-        }
-        mv.visitMethodInsn(INVOKESTATIC, "com/doctor/MethodRecordUtil", "onEnd", "()V", false);
+        mv.visitMethodInsn(INVOKESTATIC, "com/doctor/TraceTag", "o", "()V", false);
     }
 }

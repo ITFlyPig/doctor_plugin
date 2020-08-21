@@ -49,6 +49,6 @@ public class DoctorTransform extends BaseTransform {
     @Override
     protected boolean classFilter(String classPath) {
         //避免循环引用
-        return classPath.contains("MethodRecordUtil");
+        return classPath.contains("TraceTag");
     }
 }
