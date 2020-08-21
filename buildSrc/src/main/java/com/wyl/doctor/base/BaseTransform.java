@@ -103,7 +103,7 @@ public abstract class BaseTransform extends Transform {
             return;
         }
         File inputDir = directoryInput.getFile();
-        //查询对应的输入位置
+        //查询对应的输出位置
         File outputDir = transformInvocation.getOutputProvider().getContentLocation(directoryInput.getName(), directoryInput.getContentTypes(), directoryInput.getScopes(), Format.DIRECTORY);
         if (transformInvocation.isIncremental()) {
             //增量方式处理
@@ -123,7 +123,7 @@ public abstract class BaseTransform extends Transform {
                             if (!inputFile.isDirectory()) {
                                 System.out.println("输入：" + inputFile.getAbsolutePath());
                                 System.out.println("输出：" + out.getAbsolutePath());
-                                if(filter(inputFile.getAbsolutePath())) {
+                                if (filter(inputFile.getAbsolutePath())) {
                                     copyFile(inputFile, out);
                                 } else {
                                     transformFile(inputFile, out, inject());
@@ -366,6 +366,7 @@ public abstract class BaseTransform extends Transform {
 
     /**
      * 文件过滤
+     *
      * @param path
      * @return
      */
